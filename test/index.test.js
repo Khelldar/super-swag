@@ -4,7 +4,6 @@ const sinon             = require('sinon');
 const sinonChai         = require('sinon-chai');
 const sinonStubPromises = require('sinon-promises');
 const chaiAsPromised    = require('chai-as-promised');
-const mocks = require('./mocks');
 const SuperSwag = require('../.');
 
 sinonStubPromises(sinon);
