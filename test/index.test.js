@@ -14,7 +14,7 @@ const expect = chai.expect;
 
 
 describe('SuperSwag', () => {
-  let superSwag, request, response, mockAPI, getOperation, getOperations, validateRequest, controllers;
+  let superSwag, request, response, mockAPI, getOperation, getOperations, getParameters, validateRequest, controllers;
 
   beforeEach(() => {
     controllers = {
@@ -31,8 +31,10 @@ describe('SuperSwag', () => {
 
     //set up the mocked sway api object
     validateRequest = sinon.stub().returns({errors : []});
-    getOperation = sinon.stub().returns({ validateRequest });
+    getParameters = sinon.stub();
+    getOperation = sinon.stub().returns({ validateRequest, getParameters });
     getOperations = sinon.stub();
+
 
     //override the _api() helper
     superSwag._api = () => {
@@ -64,7 +66,7 @@ describe('SuperSwag', () => {
 
     it('should look up the operation by path and method', () => {
       return superSwag.validate({ request, response}).then(()=> {
-        expect(getOperation).to.be.calledWith(request.path, request.method)
+        expect(getOperation).to.be.calledWith({ url: request.path, method: request.method })
       });
     });
 
@@ -113,6 +115,33 @@ describe('SuperSwag', () => {
 
   });
 
+  describe.only('#default', () => {
+    it('should error if an object is not passed in', () => {
+      expect(() =>{
+        superSwag.default();
+      }).to.throw('options')
+    });
+
+    it('should error if request is not pased in', () => {
+      expect(() =>{
+        superSwag.default({});
+      }).to.throw('request')
+    });
+
+    it('should look up the operation by path and method', () => {
+      return superSwag.default({ request, response}).then(()=> {
+        expect(getOperation).to.be.calledWith({ url: request.path, method: request.method })
+      });
+    });
+
+    it('should set default values', () => {
+      return superSwag.default({ request, response}).then(()=> {
+        expect(getOperation).to.be.calledWith({ url: request.path, method: request.method })
+      });
+    });
+
+  });
+
   describe('#route', () => {
     beforeEach(() => {
       getOperation.returns({
@@ -123,7 +152,8 @@ describe('SuperSwag', () => {
               operationId: 'upsert'
             }
           }
-        }
+        },
+        getParameters: sinon.stub()
       });
     });
 
@@ -141,7 +171,7 @@ describe('SuperSwag', () => {
 
     it('should look up the operation by path and method', () => {
       return superSwag.route({ request, response}).then(()=> {
-        expect(getOperation).to.be.calledWith(request.path, request.method)
+        expect(getOperation).to.be.calledWith({ url: request.path, method: request.method });
       });
     });
 
